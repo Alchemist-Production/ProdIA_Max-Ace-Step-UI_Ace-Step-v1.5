@@ -99,7 +99,7 @@ REM ============================================================================
 cls
 echo.
 echo ============================================================================
-echo  Installation & Setup
+echo  Installation ^& Setup
 echo ============================================================================
 echo.
 
@@ -386,20 +386,32 @@ REM Activate Python venv and install packages
 echo Installing Python packages...
 cd "ACE-Step-1.5_"
 call .venv\Scripts\activate.bat
-pip install --upgrade pip setuptools wheel
 if !errorlevel! neq 0 (
-    echo [ERROR] Failed to upgrade pip
+    echo [ERROR] Failed to activate virtual environment
     pause
+    cd ..
     exit /b 1
 )
 
-pip install -r requirements.txt
+echo Upgrading pip, setuptools, and wheel...
+python -m pip install --upgrade pip setuptools wheel >nul 2>&1
+if !errorlevel! neq 0 (
+    echo [WARNING] pip upgrade had issues, but continuing...
+)
+
+echo.
+echo Installing requirements from requirements.txt...
+echo This may take several minutes - please be patient...
+pip install -r requirements.txt --no-cache-dir
 if !errorlevel! neq 0 (
     echo [ERROR] Failed to install Python requirements
+    echo [INFO] Please check your internet connection and try again
     pause
+    cd ..
     exit /b 1
 )
-echo [OK] Python packages installed
+echo.
+echo [OK] Python packages installed successfully
 cd ..
 
 REM Install Node.js dependencies
@@ -436,7 +448,9 @@ cd ..
 
 echo [OK] Node.js packages installed
 echo.
+echo ============================================================================
 echo All dependencies installed successfully!
+echo ============================================================================
 exit /b 0
 
 :start_all_services
