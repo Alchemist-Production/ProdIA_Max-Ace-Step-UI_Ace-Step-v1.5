@@ -364,15 +364,15 @@ if exist "ACE-Step-1.5_\.venv" (
 )
 
 echo Creating virtual environment in ACE-Step-1.5_\.venv...
-cd "ACE-Step-1.5_"
+cd /d "%~dp0ACE-Step-1.5_"
 python -m venv .venv
 if !errorlevel! neq 0 (
     echo [ERROR] Failed to create virtual environment
     pause
-    cd ..
+    cd /d "%~dp0"
     exit /b 1
 )
-cd ..
+cd /d "%~dp0"
 
 echo [OK] Virtual environment created
 exit /b 0
@@ -384,12 +384,12 @@ echo.
 
 REM Activate Python venv and install packages
 echo Installing Python packages...
-cd "ACE-Step-1.5_"
+cd /d "%~dp0ACE-Step-1.5_"
 call .venv\Scripts\activate.bat
 if !errorlevel! neq 0 (
     echo [ERROR] Failed to activate virtual environment
     pause
-    cd ..
+    cd /d "%~dp0"
     exit /b 1
 )
 
@@ -407,44 +407,44 @@ if !errorlevel! neq 0 (
     echo [ERROR] Failed to install Python requirements
     echo [INFO] Please check your internet connection and try again
     pause
-    cd ..
+    cd /d "%~dp0"
     exit /b 1
 )
 echo.
 echo [OK] Python packages installed successfully
-cd ..
+cd /d "%~dp0"
 
 REM Install Node.js dependencies
 echo.
 echo Installing Node.js dependencies...
 
-cd "ace-step-ui"
+cd /d "%~dp0ace-step-ui"
 call npm install --legacy-peer-deps
 if !errorlevel! neq 0 (
     echo [ERROR] Failed to install ace-step-ui dependencies
     pause
-    cd ..
+    cd /d "%~dp0"
     exit /b 1
 )
-cd "server"
+cd /d "%~dp0ace-step-ui\server"
 call npm install --legacy-peer-deps
 if !errorlevel! neq 0 (
     echo [ERROR] Failed to install server dependencies
     pause
-    cd ..\..
+    cd /d "%~dp0"
     exit /b 1
 )
-cd "..\..\"
+cd /d "%~dp0"
 
-cd "ace-step-ui-pro"
+cd /d "%~dp0ace-step-ui-pro"
 call npm install --legacy-peer-deps
 if !errorlevel! neq 0 (
     echo [ERROR] Failed to install ace-step-ui-pro dependencies
     pause
-    cd ..
+    cd /d "%~dp0"
     exit /b 1
 )
-cd ..
+cd /d "%~dp0"
 
 echo [OK] Node.js packages installed
 echo.
@@ -461,28 +461,25 @@ echo.
 REM Kill existing processes on required ports
 call :kill_all_ports
 
-REM Activate Python venv
-cd "ACE-Step-1.5_"
-call .venv\Scripts\activate.bat
-cd ..
-
 echo.
 echo Starting Gradio API (port 8001)...
-start "ProdIA-MAX Gradio API" cmd /k "cd ACE-Step-1.5_ && call .venv\Scripts\activate.bat && python -m acestep --port 8001 --server-name 127.0.0.1"
+echo This may take 10-15 seconds to initialize...
+start "ProdIA-MAX Gradio API" cmd /k "cd /d "%~dp0ACE-Step-1.5_" && call .venv\Scripts\activate.bat && python -m acestep --port 8001 --server-name 127.0.0.1"
 
-REM Wait for API to start
-timeout /t 5 /nobreak >nul
+REM Wait for API to fully start (increased timeout)
+echo Waiting for Gradio API to initialize...
+timeout /t 10 /nobreak >nul
 
 echo.
 echo Starting Express backend (port 3001)...
-start "ProdIA-MAX Backend" cmd /k "cd ace-step-ui\server && npm run dev"
+start "ProdIA-MAX Backend" cmd /k "cd /d "%~dp0ace-step-ui\server" && npm run dev"
 
 REM Wait for backend to start
-timeout /t 3 /nobreak >nul
+timeout /t 5 /nobreak >nul
 
 echo.
 echo Starting React frontend (port 3002)...
-start "ProdIA-MAX Frontend Pro" cmd /k "cd ace-step-ui-pro && npm run dev"
+start "ProdIA-MAX Frontend Pro" cmd /k "cd /d "%~dp0ace-step-ui-pro" && npm run dev"
 
 REM Wait for frontend to start
 timeout /t 5 /nobreak >nul
